@@ -5,6 +5,7 @@ using commercetools.Sdk.Api.Models.CustomerGroups;
 using commercetools.Sdk.Api.Models.Customers;
 using commercetools.Base.Client;
 using commercetools.Sdk.Api.Extensions;
+using commercetools.Sdk.Api.Models.Common;
 
 namespace Training.Services
 {
@@ -25,7 +26,11 @@ namespace Training.Services
         /// <returns></returns>
         public async Task<ICustomer> GetCustomerByKey(string customerKey)
         {
-            throw new NotImplementedException();
+            return await _client.WithProject(_projectKey)
+                .Customers()
+                .WithKey(customerKey)
+                .Get()
+                .ExecuteAsync();
         }
 
         /// <summary>
@@ -114,8 +119,32 @@ namespace Training.Services
         /// <returns></returns>
         public async Task<ICustomer> AssignCustomerToCustomerGroup(string customerKey, string customerGroupKey)
         {
-            throw new NotImplementedException();
+            ICustomer customer = await this.GetCustomerByKey(customerKey);
+            ICustomerGroup customerGroup = await this.GetCustomerGroupByKey(customerGroupKey);
+            ICustomerGroupResourceIdentifier customerGroupResourceIdentifier = new CustomerGroupResourceIdentifier()
+            {
+                TypeId = IReferenceTypeId.FindEnum("customer-group"),
+                Key = customerGroupKey
+            };
+            ICustomerUpdateAction customerUpdateAction = new CustomerSetCustomerGroupAction()
+            {
+                Action = "setCustomerGroup",
+                CustomerGroup = customerGroupResourceIdentifier
+            };
+            IList<ICustomerUpdateAction> customerUpdateActions = new List<ICustomerUpdateAction>();
+            customerUpdateActions.Add(customerUpdateAction);
+            ICustomerUpdate customerUpdate = new CustomerUpdate()
+            {
+                Version = customer.Version,
+                Actions = customerUpdateActions
+            };
+            ICustomer updatedCustomer = await _client.WithProject(_projectKey)
+                .Customers()
+                .WithKey(customerKey)
+                .Post(customerUpdate)
+                .ExecuteAsync();
+
+            return updatedCustomer;
         }
-        
     }
 }

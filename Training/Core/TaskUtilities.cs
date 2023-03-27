@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using commercetools.Base.Client.Error;
 
 namespace Training
 {
@@ -10,6 +11,10 @@ namespace Training
             try
             {
                 await task;
+            }
+            catch (ApiClientException ex) {
+                Console.WriteLine(ex.Body);
+                Console.WriteLine(ex.Message);
             }
             catch (Exception ex)
             {

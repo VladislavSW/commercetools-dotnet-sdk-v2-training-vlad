@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using commercetools.Base.Client;
+using commercetools.Sdk.Api.Models.Customers;
 using Training.Services;
 
 namespace Training
@@ -13,8 +14,8 @@ namespace Training
     public class Task02B : IExercise
     {
         private readonly IClient _client;
-        private const string _customerKey = "";
-        private const string _customerGroupKey = "";
+        private const string _customerKey = "SOME_GENERATED_KEY_FROM_CUSTOMER_DATA";
+        private const string _customerGroupKey = "diamond";
 
         private readonly CustomerService _customerService;
 
@@ -28,8 +29,8 @@ namespace Training
         {
 
             // TODO: SET customerGroup for the customer
-            
-            //Console.WriteLine($"customer {updatedCustomer.Id} in customer group {updatedCustomer.CustomerGroup.Id}");
+            ICustomer updatedCustomer = await _customerService.AssignCustomerToCustomerGroup(_customerKey, _customerGroupKey);
+            Console.WriteLine($"customer {updatedCustomer.Id} in customer group {updatedCustomer.CustomerGroup.Id}");
         }
     }
 }
