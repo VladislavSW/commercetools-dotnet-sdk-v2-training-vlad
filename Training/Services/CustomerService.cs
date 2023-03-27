@@ -35,7 +35,12 @@ namespace Training.Services
         /// <returns></returns>
         public async Task<ICustomer> CreateCustomer(ICustomerDraft customerDraft)
         {
-            throw new NotImplementedException();
+            ICustomerSignInResult result = await _client.WithProject(_projectKey)
+                .Customers()
+                .Post(customerDraft)
+                .ExecuteAsync();
+
+            return result.Customer;
         }
 
         /// <summary>
@@ -45,7 +50,19 @@ namespace Training.Services
         /// <returns></returns>
         public async Task<ICustomerToken> CreateCustomerToken(ICustomer customer)
         {
-            throw new NotImplementedException();
+            ICustomerCreateEmailToken customerCreateEmailToken = new CustomerCreateEmailToken()
+            {
+                Id = customer.Id,
+                Version = customer.Version,
+                TtlMinutes = 7200
+            };
+            ICustomerToken customerToken = await _client.WithProject(_projectKey)
+                .Customers()
+                .EmailToken()
+                .Post(customerCreateEmailToken)
+                .ExecuteAsync();
+
+            return customerToken;
         }
 
         /// <summary>
@@ -55,7 +72,24 @@ namespace Training.Services
         /// <returns></returns>
         public async Task<ICustomer> ConfirmCustomerEmail(ICustomerToken customerToken)
         {
-            throw new NotImplementedException();
+            ICustomer customer = _client.WithProject(_projectKey)
+                .Customers()
+                .WithEmailToken(customerToken.Value)
+                .Get()
+                .ExecuteAsync()
+                .Result;
+            ICustomerEmailVerify customerEmailVerify = new CustomerEmailVerify()
+            {
+                Version = customer.Version,
+                TokenValue = customerToken.Value
+            };
+            customer = await _client.WithProject(_projectKey)
+                .Customers()
+                .EmailConfirm()
+                .Post(customerEmailVerify)
+                .ExecuteAsync();
+
+            return customer;
         }
 
         /// <summary>

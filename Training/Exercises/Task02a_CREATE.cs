@@ -18,7 +18,7 @@ namespace Training
     {
         private readonly IClient _client;
         private readonly CustomerService _customerService;
-        private const string _customerKey = "";
+        private const string _customerKey = "SOME_GENERATED_KEY_FROM_CUSTOMER_DATA";
 
         public Task02A(IEnumerable<IClient> clients)
         {
@@ -31,31 +31,31 @@ namespace Training
             // CREATE customer draft
             var customerDraft = new CustomerDraft
             {
-                Email = "michele@example.com",
-                Password = "password",
+                Email = "vladislavs+test@scandiweb.com",
+                Password = "Option123#",
                 Key = _customerKey,
-                FirstName = "",
-                LastName = "",
+                FirstName = "Vlad",
+                LastName = "314",
                 Addresses = new List<IBaseAddress>{
                         new AddressDraft {
-                            Country = "DE",
-                            Key = _customerKey +"-home"
+                            Country = "LV",
+                            Key = _customerKey + "-home"
                     }
                 },
                 DefaultShippingAddress = 0,
                 DefaultBillingAddress = 0
             };
-            
-            // TODO: SIGNUP a customer
-            
-            //Console.WriteLine($"Customer Created with Id : {customer.Id} and Key : {customer.Key} and Email Verified: {customer.IsEmailVerified}");
-            
-            // TODO: CREATE a email verfification token
-            
-            
-            // TODO: CONFIRM CustomerEmail
 
-            //Console.WriteLine($"Is Email Verified:{retrievedCustomer.IsEmailVerified}");
+            // TODO: SIGNUP a customer
+            ICustomer customer = await _customerService.CreateCustomer(customerDraft);
+            Console.WriteLine($"Customer Created with Id : {customer.Id} and Key : {customer.Key} and Email Verified: {customer.IsEmailVerified}");
+
+            // TODO: CREATE a email verfification token
+            ICustomerToken customerToken = await _customerService.CreateCustomerToken(customer);
+
+            // TODO: CONFIRM CustomerEmail
+            ICustomer retrievedCustomer = await _customerService.ConfirmCustomerEmail(customerToken);
+            Console.WriteLine($"Is Email Verified:{retrievedCustomer.IsEmailVerified}");
         }
     }
 }

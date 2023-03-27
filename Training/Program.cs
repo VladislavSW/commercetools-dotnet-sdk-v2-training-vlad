@@ -68,7 +68,7 @@ namespace Training
         private static IConfiguration GetConfiguration()
         {
             return new ConfigurationBuilder().
-                AddJsonFile("appsettings.test.json").
+                AddJsonFile("/home/vlad314/www/CommerceTools/commercetools-dotnet-sdk-v2-training-vlad/Training/appsettings.test.json").
                 AddEnvironmentVariables().
                 Build();
         }
