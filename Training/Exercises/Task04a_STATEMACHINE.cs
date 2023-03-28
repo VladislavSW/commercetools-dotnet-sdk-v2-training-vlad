@@ -25,6 +25,7 @@ namespace Training
 
         public async Task ExecuteAsync()
         {
+            List<String> transitionKeys = new List<String>();
             // TODO: CREATE OrderPacked stateDraft, state
             var stateOrderPackedDraft = new StateDraft
             {
@@ -33,8 +34,9 @@ namespace Training
                 Name = new LocalizedString {{"en", "Order Packed"}},
                 Type = IStateTypeEnum.OrderState
             };
-            
-            
+            IState stateOrderPacked = await _stateMachineService.CreateState(stateOrderPackedDraft);
+            transitionKeys.Add(stateOrderPacked.Key);
+
             // TODO: CREATE OrderShipped stateDraft, state
             var stateOrderShippedDraft = new StateDraft
             {
@@ -43,11 +45,12 @@ namespace Training
                 Name = new LocalizedString {{"en", "Order Shipped"}},
                 Type = IStateTypeEnum.OrderState
             };
-            
-            
+            IState stateOrderShipped = await _stateMachineService.CreateState(stateOrderShippedDraft);
+            transitionKeys.Add(stateOrderShipped.Key);
+
             // TODO: UPDATE packedState to transit to stateShipped
-            
-            //Console.WriteLine($"stateOrderShipped Id : {stateOrderShipped.Id}, stateOrderPacked transition to:  {updatedStateOrderPacked.Transitions[0].Id}");
+            IState updatedStateOrderPacked = await _stateMachineService.AddTransition("OrderPacked", transitionKeys);
+            Console.WriteLine($"stateOrderShipped Id : {stateOrderShipped.Id}, stateOrderPacked transition to:  {updatedStateOrderPacked.Transitions[0].Id}");
         }
     }
 }
