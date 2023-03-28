@@ -11,6 +11,7 @@ using commercetools.Sdk.ImportApi.Models.Productdrafts;
 using commercetools.Sdk.ImportApi.Models.Productvariants;
 using commercetools.Sdk.ImportApi.Extensions;
 using System.Linq;
+using commercetools.Sdk.ImportApi.Models.Products;
 
 namespace Training.Services
 {
@@ -36,7 +37,12 @@ namespace Training.Services
         /// <returns></returns>
         public async Task<IImportContainer> CreateImportContainer(ImportContainerDraft importContainerDraft)
         {
-            throw new NotImplementedException();
+            IImportContainer importContainer = await _importClient.WithImportApi(_projectKey)
+                .ImportContainers()
+                .Post(importContainerDraft)
+                .ExecuteAsync();
+
+            return importContainer;
         }
 
         /// <summary>
@@ -46,7 +52,14 @@ namespace Training.Services
         /// <returns></returns>
         public async Task<IImportSummary> GetImportContainerSummary(string importContainerKey)
         {
-            throw new NotImplementedException();
+            IImportSummary importSummary = await _importClient.WithImportApi(_projectKey)
+                .ImportContainers()
+                .WithImportContainerKeyValue(importContainerKey)
+                .ImportSummaries()
+                .Get()
+                .ExecuteAsync();
+
+            return importSummary;
         }
 
         /// <summary>
@@ -58,7 +71,15 @@ namespace Training.Services
         public async Task<IImportOperationPagedResponse> GetImportOperationsByImportContainer(string importContainerKey, 
             bool debug)
         {
-            throw new NotImplementedException();
+
+            IImportOperationPagedResponse importOperationPagedResponse = await _importClient.WithImportApi(_projectKey)
+                .ImportContainers()
+                .WithImportContainerKeyValue(importContainerKey)
+                .ImportOperations()
+                .Get()
+                .ExecuteAsync();
+
+            return importOperationPagedResponse;
         }
 
         /// <summary>
@@ -68,7 +89,13 @@ namespace Training.Services
         /// <returns></returns>
         public async Task<IImportOperation> CheckImportOperationStatus(string operationId)
         {
-            throw new NotImplementedException();
+            IImportOperation importOperation = await _importClient.WithImportApi(_projectKey)
+                .ImportOperations()
+                .WithIdValue(operationId)
+                .Get()
+                .ExecuteAsync();
+
+            return importOperation;
         }
 
         /// <summary>
@@ -79,7 +106,31 @@ namespace Training.Services
         /// <returns></returns>
         public async Task<IImportResponse> ImportProducts(string importContainerKey, string csvFile)
         {
-            throw new NotImplementedException();
+            List<IProductDraftImport> productDraftImports = this.GetProductDraftImportList(csvFile);
+            IList<IProductImport> productImports = new List<IProductImport>();
+            foreach (var productDraft in productDraftImports) {
+                productImports.Add(
+                    new ProductImport()
+                    {
+                        Key = productDraft.Key,
+                        Name = productDraft.Name,
+                        ProductType = productDraft.ProductType,
+                        Slug = productDraft.Slug
+                    }
+                );
+            }
+            IProductImportRequest productImportRequest = new ProductImportRequest()
+            {
+                    Resources = productImports
+            };
+            IImportResponse importResponse = await _importClient.WithImportApi(_projectKey)
+                .Products()
+                .ImportContainers()
+                .WithImportContainerKeyValue(importContainerKey)
+                .Post(productImportRequest)
+                .ExecuteAsync();
+
+            return importResponse;
         }
 
         #region Helpers

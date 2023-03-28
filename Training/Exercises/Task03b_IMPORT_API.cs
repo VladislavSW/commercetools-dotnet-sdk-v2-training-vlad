@@ -6,6 +6,9 @@ using commercetools.Base.Client;
 using System.Text.Json;
 using commercetools.Sdk.ImportApi.Models.Importcontainers;
 using Training.Services;
+using commercetools.Sdk.ImportApi.Models.Importrequests;
+using commercetools.Sdk.ImportApi.Models.Importoperations;
+using Newtonsoft.Json;
 
 namespace Training
 {
@@ -13,7 +16,7 @@ namespace Training
     {
         private readonly IClient _importClient;
         private readonly ImportService _importService;
-        private const string containerKey = "";
+        private const string containerKey = "product-import-container";
         public Task03B(IEnumerable<IClient> clients)
         {
             _importClient = clients.FirstOrDefault(c => c.Name.Equals("ImportApiClient"));
@@ -22,30 +25,36 @@ namespace Training
 
         public async Task ExecuteAsync()
         {
-            var csvFile = "Resources/products.csv";
+            var csvFile = "/home/vlad314/www/CommerceTools/commercetools-dotnet-sdk-v2-training-vlad/Training/Resources/products.csv";
 
             // TODO: CREATE importContainer
+            ImportContainerDraft importContainerDraft = new ImportContainerDraft()
+            {
+                Key = containerKey
+            };
+            IImportContainer importContainer = await _importService.CreateImportContainer(importContainerDraft);
+            Console.WriteLine($"ImportContainer created with key: {importContainer.Key}");
 
-            // Console.WriteLine($"ImportContainer created with key: {importContainer.Key}");
+            //  TODO: IMPORT products
+            IImportResponse importResponse = await _importService.ImportProducts(containerKey, csvFile);
+            Console.WriteLine($"Import ProductsDraft operation has been created, operation status count: {importResponse.OperationStatus.Count}");
 
-            //  TODO: IMPORT products    
-            //    Console.WriteLine($"Import ProductsDraft operation has been created, operation status count: {importResponse.OperationStatus.Count}");
-
-            //foreach (ImportOperationStatus operationStatus in importResponse.OperationStatus) Console.WriteLine(operationStatus.OperationId);
+            foreach (ImportOperationStatus operationStatus in importResponse.OperationStatus) {
+                Console.WriteLine(operationStatus.OperationId);
+            }
 
             // TODO: GET import summary for the container
-            //    var importSummary = await _importService.GetImportContainerSummary(containerKey);
-            //    Console.WriteLine(JsonConvert.SerializeObject(importSummary,Formatting.Indented));
+            var importSummary = await _importService.GetImportContainerSummary(containerKey);
+            Console.WriteLine(JsonConvert.SerializeObject(importSummary,Formatting.Indented));
 
             // TODO: GET operation status updates
-            //    var operations = await _importService.GetImportOperationsByImportContainer(containerKey,true);
-            //    Console.WriteLine(JsonConvert.SerializeObject(operations,Formatting.Indented));
+            var operations = await _importService.GetImportOperationsByImportContainer(containerKey,true);
+            Console.WriteLine(JsonConvert.SerializeObject(operations,Formatting.Indented));
 
             // TODO: CHECK operation status by id
-            //     var opertaionId = "";
-
-            //     var op = await _importService.CheckImportOperationStatus(opertaionId);
-            //     Console.WriteLine($"Operation {opertaionId} : {op.State}");
+            var operationId = operations.Results.Last<IImportOperation>().Id;
+            var op = await _importService.CheckImportOperationStatus(operationId);
+            Console.WriteLine($"Operation {operationId} : {op.State}");
         }
     }
 }
