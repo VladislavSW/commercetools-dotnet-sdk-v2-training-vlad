@@ -46,8 +46,12 @@ namespace Training
 
            
            //Create Cart for this customer
-
-           var cart = await _cartService.CreateCart(customer);
+            ICartDraft cartDraft = new CartDraft()
+            {
+                Currency = "EUR",
+                CustomerId = customer.Id
+            };
+           var cart = await _cartService.CreateCart(cartDraft);
            Console.WriteLine($"cart for customer created with Id {cart.Id}");
            
            //Add Product to cart

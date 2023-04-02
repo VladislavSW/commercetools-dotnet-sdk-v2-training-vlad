@@ -55,11 +55,16 @@ namespace Training.Services
         /// <summary>
         /// Create a new cart for a customer with default shipping address
         /// </summary>
-        /// <param name="customer"></param>
+        /// <param name="cartDraft"></param>
         /// <returns></returns>
-        public async Task<ICart> CreateCart(ICustomer customer)
+        public async Task<ICart> CreateCart(ICartDraft cartDraft)
         {
-            throw new NotImplementedException();
+            ICart cart = await _client.WithProject(_projectKey)
+                .Carts()
+                .Post(cartDraft)
+                .ExecuteAsync();
+
+            return cart;
         }
 
         /// <summary>
@@ -68,7 +73,7 @@ namespace Training.Services
         /// <param name="anonymousId"></param>
         /// <param name="customerId"></param>
         /// <returns></returns>
-        public async Task<ICart> CreateAnonymousCart(string anonymousId = null)
+        public async Task<ICart> CreateAnonymousCart(ICartDraft cartDraft, string anonymousId = null)
         {
             return await _client.WithApi().WithProjectKey(Settings.ProjectKey)
                 .Carts()
